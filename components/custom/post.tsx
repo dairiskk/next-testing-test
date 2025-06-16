@@ -1,13 +1,14 @@
 "use client";
+
 import { Heart, MessageCircle, Share } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
 interface PostProps {
     username: string;
     avatarSrc?: string;
-    imageSrc?: string; // optional, uses default if not provided
+    imageSrc?: string;
     caption?: string;
     likes?: number;
     comments?: number;
@@ -22,69 +23,80 @@ export default function Post({
                                  comments = 0,
                              }: PostProps) {
     return (
-        // Ensure the post is positioned below a fixed navbar (h-16)
-        <div className="mt-16">
-            <Card className="w-full max-w-md md:max-w-lg mx-auto bg-color-card shadow-lg rounded-lg overflow-hidden">
-                {/* Post Header */}
-                <CardHeader className="flex items-center p-4">
-                    <Avatar className="h-10 w-10">
+        <div className="mt-6 px-4">
+            <Card className="w-full max-w-2xl mx-auto rounded-xl border bg-background shadow-sm overflow-hidden">
+                {/* Header: tight like Instagram */}
+                <div className="flex items-center gap-3 px-4 py-1.5">
+                    <Avatar className="h-8 w-8">
                         {avatarSrc ? (
                             <AvatarImage src={avatarSrc} alt={username} />
                         ) : (
-                            <AvatarFallback>{username.charAt(0)}</AvatarFallback>
+                            <AvatarFallback>{username[0].toUpperCase()}</AvatarFallback>
                         )}
                     </Avatar>
-                    <span className="ml-3 font-semibold text-color-foreground">
+                    <span className="text-sm font-medium text-foreground leading-none">
             {username}
           </span>
-                </CardHeader>
+                </div>
 
-                {/* Post Image using native <img> to avoid Next.js domain config */}
-                <CardContent className="p-0">
-                    <div className="w-full h-64 md:h-96 relative">
-                        <img
-                            src={imageSrc}
-                            alt="Post image"
-                            className="w-full h-full object-cover"
-                            loading="lazy"
-                        />
-                    </div>
-                </CardContent>
+                {/* Image */}
+                <div className="w-full h-72 md:h-96">
+                    <img
+                        src={imageSrc}
+                        alt="Post content"
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                    />
+                </div>
 
-                {/* Post Actions & Info */}
-                <CardFooter className="flex flex-col p-4 space-y-3">
-                    {/* Action Buttons */}
-                    <div className="flex items-center space-x-4">
-                        <Button variant="ghost" size="icon">
-                            <Heart className="text-color-foreground" />
-                        </Button>
-                        <Button variant="ghost" size="icon">
-                            <MessageCircle className="text-color-foreground" />
-                        </Button>
-                        <Button variant="ghost" size="icon">
-                            <Share className="text-color-foreground" />
-                        </Button>
-                    </div>
+                {/* Actions */}
+                <div className="flex items-center gap-5 px-4 py-3">
+                    <ActionButton icon={<Heart className="w-5 h-5" />} label="Like" />
+                    <ActionButton icon={<MessageCircle className="w-5 h-5" />} label="Comment" />
+                    <ActionButton icon={<Share className="w-5 h-5" />} label="Share" />
+                </div>
 
-                    {/* Likes Count */}
-                    <div className="text-sm font-medium text-color-foreground">
-                        {likes} {likes === 1 ? 'like' : 'likes'}
+                {/* Info Section */}
+                <div className="px-4 pb-4 space-y-2">
+                    {/* Likes */}
+                    <div className="text-sm font-semibold text-foreground">
+                        {likes} {likes === 1 ? "like" : "likes"}
                     </div>
 
                     {/* Caption */}
                     {caption && (
-                        <div className="text-sm text-color-foreground">
+                        <div className="text-sm text-foreground leading-snug">
                             <span className="font-semibold mr-1">{username}</span>
                             {caption}
                         </div>
                     )}
 
-                    {/* Comments Link */}
-                    <button className="text-xs text-color-secondary hover:underline self-start">
-                        View all {comments} {comments === 1 ? 'comment' : 'comments'}
+                    {/* View Comments */}
+                    <button className="text-xs text-muted-foreground hover:underline">
+                        View all {comments} {comments === 1 ? "comment" : "comments"}
                     </button>
-                </CardFooter>
+                </div>
             </Card>
         </div>
+    );
+}
+
+// Icon button component
+function ActionButton({
+                          icon,
+                          label,
+                      }: {
+    icon: React.ReactNode;
+    label: string;
+}) {
+    return (
+        <Button
+            variant="ghost"
+            size="icon"
+            aria-label={label}
+            className="hover:bg-accent text-muted-foreground hover:text-foreground transition"
+        >
+            {icon}
+        </Button>
     );
 }
