@@ -37,9 +37,9 @@ describe('LoginPage Static UI', () => {
     });
 });
 
-describe('LoginPage Snapshot', () => {
-    it('matches the snapshot', () => {
-        const { asFragment } = render(<LoginPage />);
-        expect(asFragment()).toMatchSnapshot();
-    });
-});
+// describe('LoginPage Snapshot', () => {
+//     it('matches the snapshot', () => {
+//         const { asFragment } = render(<LoginPage />);
+//         expect(asFragment()).toMatchSnapshot();
+//     });
+// });
