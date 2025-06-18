@@ -1,9 +1,9 @@
 import { createApiHandler } from '@/lib/createApiHandler';
 import { authSchema } from '@/lib/schemas/auth';
-import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/prisma';
 import { ApiError } from '@/lib/errors';
+import {sendSuccess} from "@/lib/apiResponse";
 
 export const POST = createApiHandler(authSchema, async (req, { email, password }) => {
     const existing = await prisma.user.findUnique({ where: { email } });
@@ -18,5 +18,5 @@ export const POST = createApiHandler(authSchema, async (req, { email, password }
         },
     });
 
-    return NextResponse.json({ message: 'User registered successfully' });
+    return sendSuccess({ message: 'registered' });
 });
