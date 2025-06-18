@@ -2,32 +2,51 @@ name: Run Tests (API + UI)
 
 on:
   push:
-    branches: [main]
-  pull_request:
+    branches: [main]          # run on push to main
+  pull_request:               # and on every PR targeting main
     branches: [main]
 
 jobs:
-  install:
+  tests:
     runs-on: ubuntu-latest
+
     steps:
+      # ───── Checkout repo ───────────────────────────────
       - uses: actions/checkout@v4
+
+      # ───── Set up Node + cache npm dir ────────────────
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
+          cache: npm
 
+      # ───── Install deps (npm ci) ──────────────────────
       - name: Install dependencies
         run: npm ci
 
+      # ───── Run API tests (node env) ───────────────────
       - name: Run API tests
         run: npm run test:api
 
+      # ───── Run UI tests (jsdom env) ───────────────────
       - name: Run UI tests
         run: npm run test:ui
 
-      - name: Upload coverage reports
-        if: success()
+      # ───── Upload coverage to Codecov ─────────────────
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: coverage/lcov.info                # Jest default file
+          flags: api-ui                            # tag this upload
+          token: ${{ secrets.CODECOV_TOKEN }}      # not needed for public repos
+          name: codecov-coverage-report
+          fail_ci_if_error: true                   # fail job if upload fails
+
+      # (optional) also keep the HTML report as an artifact
+      - name: Upload coverage artifact
+        if: always()                               # run even if tests fail
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report
           path: coverage/
+          retention-days: 7
