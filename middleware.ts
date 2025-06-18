@@ -1,24 +1,21 @@
-// middleware.ts
+// middleware.ts  – Edge runtime
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyJwt } from './utils/jwt';
 
 export function middleware(req: NextRequest) {
     const path = req.nextUrl.pathname;
 
-    // Allow public routes
+    // allow public routes
     if (path.startsWith('/api/auth') || path.startsWith('/auth')) {
         return NextResponse.next();
     }
 
-    // Check for JWT in Authorization header
-    const token = req.headers.get('authorization')?.split(' ')[1];
-    const isValid = token && verifyJwt(token);
-
-    if (!isValid) {
+    // only check that a Bearer token string exists
+    const hasBearer = /^Bearer\s.+$/i.test(req.headers.get('authorization') || '');
+    if (!hasBearer) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    return NextResponse.next();
+    return NextResponse.next();     // route does full verify
 }
 
 export const config = {

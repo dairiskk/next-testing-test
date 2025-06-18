@@ -1,6 +1,9 @@
-import { NextResponse } from 'next/server';
-import {getAuthUser} from "@/lib/getAuthUser";
+// app/api/protected/route.ts
+import { handleApi } from '@/lib/handleApi';
+import { getAuthUser } from '@/lib/getAuthUser';
+import { sendSuccess } from '@/lib/apiResponse';
 
-export async function GET(req: Request) {
-    return NextResponse.json({ message: 'This is protected data', user: getAuthUser(req) });
-}
+export const GET = handleApi(async (req) => {
+    const user = getAuthUser(req);
+    return sendSuccess({ message: 'Protected data access granted', user });
+});

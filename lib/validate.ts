@@ -1,16 +1,12 @@
+// lib/validate.ts
 import { z } from 'zod';
 import { ApiError } from './errors';
 
-/**
- * Validates a JSON request body against a Zod schema.
- * Throws ApiError on failure.
- */
 export async function validateBody<T extends z.ZodTypeAny>(
     req: Request,
     schema: T
 ): Promise<z.infer<T>> {
     const contentType = req.headers.get('content-type') || '';
-
     if (!contentType.includes('application/json')) {
         throw new ApiError('Content-Type must be application/json', 415);
     }
@@ -19,18 +15,13 @@ export async function validateBody<T extends z.ZodTypeAny>(
     try {
         body = await req.json();
     } catch {
-        throw new ApiError('Invalid or missing JSON in request body', 400);
+        throw new ApiError('Invalid JSON body', 400);
     }
 
-    if (!body || typeof body !== 'object' || Object.keys(body).length === 0) {
-        throw new ApiError('Request body cannot be empty', 400);
+    const parsed = schema.safeParse(body);
+    if (!parsed.success) {
+        throw new ApiError('Validation failed', 422, parsed.error.format());
     }
 
-    const result = schema.safeParse(body);
-    if (!result.success) {
-        const message = result.error.issues.map((i) => i.message).join(', ');
-        throw new ApiError(`Validation error: ${message}`, 400);
-    }
-
-    return result.data;
+    return parsed.data;
 }
