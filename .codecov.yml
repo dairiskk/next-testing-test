@@ -1,0 +1,25 @@
+codecov:
+  require_ci_to_pass: true
+
+coverage:
+  status:
+    project:
+      default:
+        target: 80%            # Require 80% total coverage
+        threshold: 1%          # Allow ≤1% drop without failing PR
+        informational: false   # Fail if threshold exceeded
+    patch:
+      default:
+        target: 80%            # Require 80% of PR-changed lines
+        threshold: 1%
+        informational: false
+
+comment:
+  layout: "reach, diff, flags, files"
+  behavior: default             # always post unless no changes
+  require_changes: true         # don't post if no coverage changes
+  after_n_builds: 1             # wait for all CI builds (default is 1)
+
+parsers:
+  javascript:
+    enable_partials: yes        # include partial line hits
