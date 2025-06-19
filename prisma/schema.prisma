@@ -8,8 +8,46 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
+  id        Int       @id @default(autoincrement())
+  email     String    @unique
   password  String
+  name      String?
+  bio       String?
+  image     String? // Profile picture URL
+  posts     Post[]    @relation("UserPosts")
+  comments  Comment[] @relation("UserComments")
+  likes     Like[]    @relation("UserLikes")
+  createdAt DateTime  @default(now())
+}
+
+model Post {
+  id        Int       @id @default(autoincrement())
+  caption   String?
+  imageUrl  String?
+  author    User      @relation("UserPosts", fields: [authorId], references: [id])
+  authorId  Int
+  comments  Comment[] @relation("PostComments")
+  likes     Like[]    @relation("PostLikes")
+  createdAt DateTime  @default(now())
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  content   String
+  post      Post     @relation("PostComments", fields: [postId], references: [id])
+  postId    Int
+  author    User     @relation("UserComments", fields: [authorId], references: [id])
+  authorId  Int
   createdAt DateTime @default(now())
+}
+
+model Like {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation("UserLikes", fields: [userId], references: [id])
+  userId    Int
+  post      Post     @relation("PostLikes", fields: [postId], references: [id])
+  postId    Int
+  createdAt DateTime @default(now())
+
+  @@unique([userId, postId]) // One like per user per post
 }

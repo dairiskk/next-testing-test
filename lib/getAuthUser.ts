@@ -2,12 +2,10 @@
 import { verifyJwt } from '@/utils/jwt';
 import { ApiError } from './errors';
 
-export function getAuthUser<T = any>(req: Request): T {
+export function getAuthUser<T = { id: number; email: string }>(req: Request): T {
     const token = req.headers.get('authorization')?.split(' ')[1];
-    if (!token) throw new ApiError('Missing token', 401);
+    const user = token ? verifyJwt<T>(token) : null;
 
-    const user = verifyJwt<T>(token);
     if (!user) throw new ApiError('Invalid token', 403);
-
     return user;
 }
