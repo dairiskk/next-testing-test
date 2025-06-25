@@ -4,23 +4,43 @@ import { ApiError } from './errors';
 import { sendError } from './apiResponse';
 import { Prisma } from '@prisma/client';
 
+type WithBody<T extends z.ZodTypeAny> = (req: Request, body: z.infer<T>) => Promise<Response>;
+type NoBody = (req: Request) => Promise<Response>;
+
 export function createApiHandler<T extends z.ZodTypeAny>(
     schema: T,
-    handler: (req: Request, body: z.infer<T>) => Promise<Response>
+    handler: WithBody<T>
+): (req: Request) => Promise<Response>;
+
+export function createApiHandler(
+    schema: undefined,
+    handler: NoBody
+): (req: Request) => Promise<Response>;
+
+export function createApiHandler(
+    schema: z.ZodTypeAny | undefined,
+    handler: any
 ): (req: Request) => Promise<Response> {
     return async (req) => {
         try {
-            if (req.headers.get('content-type')?.includes('application/json') !== true) {
-                throw new ApiError('Content-Type must be application/json', 415);
+            let parsedBody: any = undefined;
+
+            if (schema) {
+                const contentType = req.headers.get('content-type') || '';
+                if (!contentType.includes('application/json')) {
+                    throw new ApiError('Content-Type must be application/json', 415);
+                }
+
+                const body = await req.json();
+                const parsed = schema.safeParse(body);
+                if (!parsed.success) {
+                    throw new ApiError('Invalid request body', 400, parsed.error.issues);
+                }
+
+                parsedBody = parsed.data;
             }
 
-            const body = await req.json();
-            const parsed = schema.safeParse(body);
-            if (!parsed.success) {
-                throw new ApiError('Invalid request body', 400, parsed.error.issues);
-            }
-
-            return await handler(req, parsed.data);
+            return schema ? await handler(req, parsedBody) : await handler(req);
         } catch (err: any) {
             let status = 500;
             let message = 'Internal server error';

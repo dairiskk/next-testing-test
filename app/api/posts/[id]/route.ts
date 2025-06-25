@@ -30,11 +30,10 @@ export const PUT = createApiHandler(postSchema, async (req, body) => {
 });
 
 // DELETE /api/posts/[id]
-export async function DELETE(req: Request) {
-    const user = getAuthUser(req);
-    const url = new URL(req.url);
-    const id = parseInt(url.pathname.split('/').pop() || '', 10);
+export const DELETE = createApiHandler(undefined, async (req) => {
+    const user = await getAuthUser(req);
 
+    const id = parseInt(req.url.split('/').pop() || '', 10);
     if (isNaN(id)) throw new ApiError('Invalid post ID', 400);
 
     const post = await prisma.post.findUnique({ where: { id } });
@@ -43,6 +42,5 @@ export async function DELETE(req: Request) {
     }
 
     await prisma.post.delete({ where: { id } });
-
-    return sendSuccess({ message: 'Post deleted' });
-}
+    return sendSuccess({ message: 'Post deleted successfully' });
+});

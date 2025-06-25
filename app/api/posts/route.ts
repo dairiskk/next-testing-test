@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+
 import { prisma } from '@/lib/prisma';
 import { createApiHandler } from '@/lib/createApiHandler';
 import { getAuthUser } from '@/lib/getAuthUser';
@@ -20,9 +20,8 @@ export async function GET(req: Request) {
     return sendSuccess(posts);
 }
 
-// POST /api/posts — Create a new post
 export const POST = createApiHandler(postSchema, async (req, body) => {
-    const user = await getAuthUser(req);
+    const user = getAuthUser(req);
 
     const newPost = await prisma.post.create({
         data: {
